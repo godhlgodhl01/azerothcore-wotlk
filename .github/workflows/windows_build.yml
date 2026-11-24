@@ -113,11 +113,20 @@ jobs:
           export CTOOLS_BUILD=all
           ./acore.sh compiler build
 
+      - name: Collect All Build Files
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force -Path output | Out-Null
+          if (Test-Path "env\dist") { Copy-Item -Path "env\dist\*" -Destination "output" -Recurse -Force }
+          if (Test-Path "var\build\bin") { Copy-Item -Path "var\build\bin" -Destination "output\bin" -Recurse -Force }
+          if (Test-Path "build\bin") { Copy-Item -Path "build\bin" -Destination "output\bin" -Recurse -Force }
+          if (Test-Path "data\sql") { Copy-Item -Path "data\sql" -Destination "output\sql" -Recurse -Force }
+          Get-ChildItem -Recurse -Include *.exe,*.dll,*.pdb,*.conf.dist | Copy-Item -Destination "output" -Force -ErrorAction SilentlyContinue
+
       - name: Upload Windows Build
         uses: actions/upload-artifact@v4
         with:
-          name: AzerothCore-Windows-Playerbot
-          path: |
-            env/dist/bin/RelWithDebInfo/*
-            env/dist/bin/Release/*
-            env/dist/etc/*
+          name: AzerothCore-Windows-Full
+          path: output/
+
+            
